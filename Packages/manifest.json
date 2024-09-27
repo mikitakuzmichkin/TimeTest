@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.smkplus.custom-toolbar": "https://github.com/smkplus/CustomToolbar.git#master",
     "com.unity.collab-proxy": "2.5.1",
     "com.unity.feature.2d": "2.0.0",
     "com.unity.ide.rider": "3.0.28",

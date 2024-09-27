@@ -1,6 +1,7 @@
 ﻿using System;
 using DPackage.DI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Scenes
 {
@@ -11,6 +12,8 @@ namespace Scenes
             var timeService = new TimeService();
             timeService.Init();
             DProjectContext.Bind(timeService);
+
+            SceneManager.LoadScene(1);
         }
     }
 }
