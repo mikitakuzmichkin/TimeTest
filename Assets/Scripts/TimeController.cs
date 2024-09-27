@@ -1,6 +1,7 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using DPackage.DI;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
@@ -9,7 +10,6 @@ namespace DefaultNamespace
         private TimeView _timeView;
         private TimeViewUi _ui;
         private TimeService _timeService;
-        private DateTime _time;
 
         private bool _isDisposed = false;
         
@@ -22,13 +22,11 @@ namespace DefaultNamespace
 
             _timeService = DProjectContext.GetInstance<TimeService>();
             
-            _time = _timeService.CurTime;
-            _timeView.SetTime(_time);
-            _ui.SetTime(_time);
+            var time = _timeService.CurTime;
+            _timeView.SetTime(time);
+            _ui.SetTime(time);
             
             Subscribe();
-            
-            UpdateTime().Forget();
         }
 
         private void Subscribe()
@@ -43,21 +41,10 @@ namespace DefaultNamespace
 
         private void UpdateTimeFromServer(DateTime time)
         {
-            _time = time;
+            _timeView.SetTime(time);
+            _ui.SetTime(time);
         }
         
-        private async UniTaskVoid UpdateTime()
-        {
-            while (_isDisposed == false)
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(1), ignoreTimeScale: false);
-                
-                _time = _time.AddSeconds(1);
-                _timeView.SetTime(_time);
-                _ui.SetTime(_time);
-            }
-        }
-
         public void Dispose()
         {
             Unsubscribe();

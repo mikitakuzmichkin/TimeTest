@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DefaultNamespace;
+using DPackage.DI;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class TimeService
+public class TimeService : IDisposable
 {
     private const string _URL = "https://yandex.com/time/sync.json";
 
@@ -18,16 +20,52 @@ public class TimeService
     
     public void Init()
     {
+        UpdateTimeByServer().Forget();
         UpdateTime().Forget();
+        Subscribe();
     }
 
-    public async UniTaskVoid UpdateTime()
+    private void Subscribe()
+    {
+        DProjectContext.GetInstance<MonoBehaviourEvents>().OnApplicationPauseEvent += UpdateAfterPause;
+    }
+
+    private void UnSubscribe()
+    {
+        DProjectContext.GetInstance<MonoBehaviourEvents>().OnApplicationPauseEvent -= UpdateAfterPause;
+    }
+
+    public async UniTaskVoid UpdateTimeByServer()
     {
         while (true)
         {
             TimeServerRequest().Forget();
             await UniTask.Delay(TimeSpan.FromHours(1), ignoreTimeScale: false);
         }
+    }
+    
+    private async UniTaskVoid UpdateTime()
+    {
+        while (true)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(1), ignoreTimeScale: false);
+                
+            _curTime = _curTime.AddSeconds(1);
+            OnTimeChanged?.Invoke(_curTime);
+        }
+    }
+
+    private void UpdateAfterPause(bool pauseStatus)
+    {
+        if (pauseStatus == false)
+        {
+            ForceUpdateTime();
+        }
+    }
+
+    public void ForceUpdateTime()
+    {
+        TimeServerRequest().Forget();
     }
 
     public async UniTaskVoid TimeServerRequest()
@@ -46,9 +84,14 @@ public class TimeService
                     TimeSpan timeSpan = TimeSpan.FromMilliseconds(ticks);
                     DateTime time = (new DateTime(1970, 1, 1) + timeSpan).ToLocalTime();
                     _curTime = time;
-                    OnTimeChanged?.Invoke(time);
+                    OnTimeChanged?.Invoke(_curTime);
                 }
             }
         }
+    }
+
+    public void Dispose()
+    {
+        UnSubscribe();
     }
 }
