@@ -11,12 +11,8 @@ namespace DefaultNamespace
         private TimeViewUi _ui;
         private TimeService _timeService;
 
-        private bool _isDisposed = false;
-        
         public void Init(TimeView timeView, TimeViewUi ui)
         {
-            _isDisposed = false;
-            
             _timeView = timeView;
             _ui = ui;
 
@@ -48,7 +44,6 @@ namespace DefaultNamespace
         public void Dispose()
         {
             Unsubscribe();
-            _isDisposed = true;
         }
     }
 }
